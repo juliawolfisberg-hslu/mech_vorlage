@@ -34,12 +34,28 @@ class PIDController:
         #  1. Speichern Sie den vorherigen Fehler in der Variablen
         #     'error_linear_old', berechnen Sie den neuen Fehler und
         #     speichern Sie diesen in self.error_linear
+        error_linear_old = self.error_linear
+        self.error_linear = self.reference_value - actual_value
+
         # TODO: Implementieren
         #  2. Berechnen Sie
         #     - den aktuellen Positions-Fehler 'self.error_linear'
         #     - das aktuelle Fehler-Integral 'self.error_integral'; denken
         #       Sie dabei an windup
         #     - das aktuelle Fehler-Derivative 'error_derivative'
+        # 2. Integral und Derivative berechnen
+
+        # Integral: Fehler aufsummieren
+        self.error_integral += self.error_linear
+
+        # Anti-Windup: Integral begrenzen, damit es nicht "ins Unendliche" wächst
+        self.error_integral = max(min(self.error_integral, self.anti_windup), -self.anti_windup)
+
+        # Derivative: Wie stark hat sich der Fehler seit dem letzten Mal verändert?
+        error_derivative = self.error_linear - error_linear_old
+
+
+
         # TODO: Implementieren
         #  3. Berechnen Sie aus den Fehlern die P, I und D-Anteile;
         #     Sie können diese Werte in den Variablen p_part, i_part
@@ -49,6 +65,11 @@ class PIDController:
         i_part = 0
         d_part = 0
         # TODO: Implementieren
+
+        # 3. P, I und D-Anteile berechnen
+        p_part = self.kp * self.error_linear
+        i_part = (self.kp / self.Tn) * self.error_integral if self.Tn != 0 else 0
+        d_part = (self.kp * self.Tv) * error_derivative
 
         # Save the three parts of the controller in a vector
         pid_actions = [p_part, i_part, d_part]
