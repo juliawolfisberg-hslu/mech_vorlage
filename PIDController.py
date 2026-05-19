@@ -44,8 +44,15 @@ class PIDController:
         #       Sie dabei an windup
         #     - das aktuelle Fehler-Derivative 'error_derivative'
         self.error_linear = self.reference_value - actual_value
-        self.error_integral = self.error_linear * 0.01 
-        error_derivative = (self.error_linear - error_linear_old) / 0.01
+        self.error_integral += self.error_linear
+
+        #Anti-windup: Begrenzen des Fehler-Integrals
+        if self.error_integral * self.kp / self.Tn > self.anti_windup:
+            self.error_integral = self.anti_windup * self.Tn / self.kp
+        elif self.error_integral * self.kp / self.Tn < -self.anti_windup:
+            self.error_integral = -self.anti_windup * self.Tn / self.kp
+
+        error_derivative = (self.error_linear - error_linear_old)
 
 
         # TODO: Implementieren
@@ -58,10 +65,6 @@ class PIDController:
         d_part = self.kp * self.Tv * error_derivative
         # TODO: Implementieren
 
-        # 3. P, I und D-Anteile berechnen
-        p_part = self.kp * self.error_linear
-        i_part = (self.kp / self.Tn) * self.error_integral if self.Tn != 0 else 0
-        d_part = (self.kp * self.Tv) * error_derivative
 
         # Save the three parts of the controller in a vector
         pid_actions = [p_part, i_part, d_part]
