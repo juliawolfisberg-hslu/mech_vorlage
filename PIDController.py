@@ -35,7 +35,7 @@ class PIDController:
         #     'error_linear_old', berechnen Sie den neuen Fehler und
         #     speichern Sie diesen in self.error_linear
         error_linear_old = self.error_linear
-        self.error_linear = self.reference_value - actual_value
+
 
         # TODO: Implementieren
         #  2. Berechnen Sie
@@ -43,17 +43,9 @@ class PIDController:
         #     - das aktuelle Fehler-Integral 'self.error_integral'; denken
         #       Sie dabei an windup
         #     - das aktuelle Fehler-Derivative 'error_derivative'
-        # 2. Integral und Derivative berechnen
-
-        # Integral: Fehler aufsummieren
-        self.error_integral += self.error_linear
-
-        # Anti-Windup: Integral begrenzen, damit es nicht "ins Unendliche" wächst
-        self.error_integral = max(min(self.error_integral, self.anti_windup), -self.anti_windup)
-
-        # Derivative: Wie stark hat sich der Fehler seit dem letzten Mal verändert?
-        error_derivative = self.error_linear - error_linear_old
-
+        self.error_linear = self.reference_value - actual_value
+        self.error_integral = self.error_linear * 0.01 
+        error_derivative = (self.error_linear - error_linear_old) / 0.01
 
 
         # TODO: Implementieren
@@ -61,9 +53,9 @@ class PIDController:
         #     Sie können diese Werte in den Variablen p_part, i_part
         #     und d_part abspeichern oder die Berechnungen direkt in die
         #     Liste der pid_actions schreiben
-        p_part = 0
-        i_part = 0
-        d_part = 0
+        p_part = self.kp * self.error_linear
+        i_part = self.kp / self.Tn * self.error_integral
+        d_part = self.kp * self.Tv * error_derivative
         # TODO: Implementieren
 
         # 3. P, I und D-Anteile berechnen
